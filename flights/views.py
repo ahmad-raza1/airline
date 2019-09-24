@@ -11,6 +11,6 @@ def Hello(request):
 
 def index(request):
 	context = {
-		"airports": Airport.objects.all()
+		"flights": Flight.objects.all()
 	}
 	return render(request, "flights/index.html", context)
