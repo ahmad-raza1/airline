@@ -1,5 +1,7 @@
 from django.shortcuts import render
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.urls import reverse
+
 from .models import Airport, Flight, Passenger
 
 # Create your views here.
@@ -24,5 +26,31 @@ def flight(request, flight_id):
 	context = {
 		"flight": flight,
 		"passengers": flight.passengers.all(),
+		"non_passengers": Passenger.objects.exclude(flights=flight).all(),
 	}
 	return render(request, "flights/flight.html", context)
+
+def book(request, flight_id):
+	try:
+		passenger_id = int(request.POST["passenger"])
+		passenger = Passenger.objects.get(pk=passenger_id)
+		flight = Flight.objects.get(pk=flight_id)
+
+	except KeyError:
+		return render(request, "flights/error.html", {"message": "No selection."})
+
+	except Passenger.DoesNotExist:
+		return render(request, "flights/error.html", {"message": "No passenger."})
+
+	except Flight.DoesNotExist:
+		return render(request, "flights/error.html", {"message": "No flight."})
+
+	passenger.flights.add(flight)
+
+	# Redirect from name of the url called "flight" to actual url
+	# that also takes an additional argumrnt "flight_id"
+
+	# Always return an HttpResponseRedirect after successfully dealing
+	# with POST data. This prevents data from being posted twice if a
+	# user hits the Back button.
+	return HttpResponseRedirect(reverse("flight", args=(flight_id,)))
