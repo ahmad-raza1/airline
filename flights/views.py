@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
-from .models import Airport, Flight
+from .models import Airport, Flight, Passenger
 
 # Create your views here.
 
@@ -22,6 +22,7 @@ def flight(request, flight_id):
 		raise Http404("Flight does not exist!")
 
 	context = {
-		"flight": flight
+		"flight": flight,
+		"passengers": flight.passengers.all(),
 	}
 	return render(request, "flights/flight.html", context)
